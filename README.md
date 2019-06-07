@@ -1,5 +1,6 @@
 # corator
-Stylish, useful python decorators for coding with your pinky extended
+In-development decorator library for nontrivial decoration and boiler-plate code 
+automation.
 
 # usage
 A quick example of a decorator from the `decorum.decorators` that caches computationally
