@@ -1,4 +1,4 @@
-# decorum
+# corator
 Stylish, useful python decorators for coding with your pinky extended
 
 # usage
@@ -6,7 +6,7 @@ A quick example of a decorator from the `decorum.decorators` that caches computa
 intensive routine outputs
 
 ```python
-from decorum.decorators import autocache
+from corator.decorators import autocache
 import random 
 import pickle
 
