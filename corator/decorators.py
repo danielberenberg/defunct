@@ -22,8 +22,13 @@ def autocache(loader=text_loader,
     serializing onto disk.
     
     This function is meant to decorate a value-returning callable,
-    the `handler`. The added routines of @cache are (keyword) argument
+    the `handler`. The added routines of @autocache are (keyword) argument
     agnostic. 
+
+    The decorated function inherits two keyword arguments:
+        :cache_to - valid path to persist outputs to disk
+        :overwrite - a boolean that forces the routine to cache, but not 
+                     check for disk persistence
 
     That is, `handler` positional args are treated as a some-dimensional
     array of inputs called *args and keywords are given by the mapping **kwargs
@@ -51,7 +56,7 @@ def autocache(loader=text_loader,
     it's going to be accessed multiple times, perhaps after the program
     has vacated volatile storage. 
     
-    In this case, @cache is applicable to save time on next-startup.
+    In this case, @autocache is applicable to save time on next-startup.
     
     >>> @cache(loader=pickle.load, dumper=pickle.dump,
     >>>        read_opts='rb', write_opts='wb',
@@ -80,8 +85,9 @@ def autocache(loader=text_loader,
             raise ValueError(err_msgs[1])
 
         @wraps(handler)
-        def wrapper(*args, cache_to="cached.txt", **kwargs):
+        def wrapper(*args, cache_to="cached.txt", overwrite=False,**kwargs):
             try:
+                if overwrite: raise FileNotFoundError
                 with opener(cache_to, 'r' + read_as) as lod:
                     if verbose:
                         print("{} is cached!".format(cache_to))

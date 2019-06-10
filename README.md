@@ -3,8 +3,8 @@ In-development decorator library for nontrivial decoration and boiler-plate code
 automation.
 
 # usage
-A quick example of a decorator from the `decorum.decorators` that caches computationally
-intensive routine outputs
+A quick example of a decorator from the `corator.decorators` module that caches 
+outputs of computationally intensive procedures
 
 ```python
 from corator.decorators import autocache
