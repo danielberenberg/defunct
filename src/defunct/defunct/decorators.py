@@ -79,7 +79,7 @@ def autocache(loader=text_loader,
 
     def decorator(handler):
         if not all(callable(func) for func in (loader, dumper, opener, handler)):
-            raise ValueError(err_msgs[0])
+            raise TypeError(err_msgs[0])
 
         if not all(mode in {'b','t'} for mode in (read_as, write_as)):
             raise ValueError(err_msgs[1])
