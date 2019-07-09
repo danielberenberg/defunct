@@ -25,8 +25,8 @@ Or who hasn't wanted to save a marginal amount of characters to perform a compos
 ```python
 from defunct.funcs import compose
 
-composed_function = compose([lambda x: x * 10, int, str, chr])
+composed_function = compose(lambda x: x * 10, int, chr)
 
 composed_function(97.5)
-    Ϗ # chr(str(int(97.5 * 10)))!!
+    'Ϗ' # chr(int(97.5 * 10)))!!
 ```

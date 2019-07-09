@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from functools import wraps
+
 def compose(*functions):
     """
     Compose a sequence of functions to a one routine.
@@ -31,6 +33,8 @@ def _compose(funcerator, f):
     """Recursively composes functions into a stack"""
     try:
         g = next(funcerator)
+
+        @wraps(f)
         def h(*args, **kwargs):
             return g(f(*args, **kwargs))
 
