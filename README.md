@@ -1,13 +1,12 @@
-# corator
-In-development decorator library for nontrivial decoration and boiler-plate code 
-automation.
+# defunct
+Exploring the functional paradigm in Python. Implementing dope decorators and funky functions.
 
 # usage
 A quick example of a decorator from the `corator.decorators` module that caches 
 outputs of computationally intensive procedures
 
 ```python
-from corator.decorators import autocache
+from defunct.decorators import autocache
 import random 
 import pickle
 
