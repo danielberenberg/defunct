@@ -34,7 +34,7 @@ def _compose(funcerator, f):
     try:
         g = next(funcerator)
 
-        @wraps(f)
+        @wraps(g)
         def h(*args, **kwargs):
             return g(f(*args, **kwargs))
 
