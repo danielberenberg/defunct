@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from functools import wraps
+import functools
 
 def compose(*functions):
     """
@@ -34,7 +34,7 @@ def _compose(funcerator, f):
     try:
         g = next(funcerator)
 
-        @wraps(g)
+        @functools.wraps(g)
         def h(*args, **kwargs):
             return g(f(*args, **kwargs))
 
@@ -42,6 +42,43 @@ def _compose(funcerator, f):
 
     except StopIteration:
         return f
+
+
+def rpartial(func, *args):
+    """
+    Set positional arguments a la functools `partial`.
+    `rpartial` is used to set partial positional arguments 'to the right of'
+    variable args
+
+    E.g.,
+    >>> is_int = rpartial(isinstance, int)
+    >>> is_int(6)
+        True
+    >>> is_int('no such int')
+        False
+    """
+    @functools.wraps(func)
+    def wrapper(*a):
+        return func(*(a + args))
+
+    return wrapper
+
+def lpartial(func, *args):
+    """
+    Set positional arguments a la functools `partial`
+    `lpartial` is used to set partial positional arguments 'to the left of'
+    variable args.
+
+    E.g.,
+    >>> range_100 = lpartial(range, 100)
+    >>> list(range_100(110 + 1, 2))
+        [100, 102, 104, 106, 108, 110]
+
+    """
+    @functools.wraps(func)
+    def wrapper(*a):
+        return func(*(args + a))
+    return wrapper
 
 if __name__ == '__main__':
     pass

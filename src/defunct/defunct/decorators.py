@@ -6,8 +6,13 @@ decorators.py
 
 collection of decorous decorators to make your computational life easier
 """
+import warnings
+import operator as op
 from functools import wraps
+from inspect import isclass, isfunction
+                
 from .utils import text_loader, text_dumper
+from .funcs import rpartial
 
 __all__ = ['autocache', 'check_that']
 
@@ -102,21 +107,120 @@ def autocache(loader=text_loader,
         return wrapper
     return decorator
 
-def check_that(assertion=lambda x: True, onfail=None):
+def deprecated(reason):
     """
-    a decorator to validate some arbitrary truthy statement
-    prior to the actual computation
+    This is a decorator which can be used to mark functions
+    as deprecated.
+    
+    Results in a warning being emitted when the function is used
+
+    Adapted from:
+    [https://stackoverflow.com/questions/2536307/decorators-in-the-python-standard-lib-deprecated-specifically]
+    """
+    string_types = (type(b''), type(u''))
+    if isinstance(reason, string_types):
+        # @deprecated('some reason')
+        # def deprec_func(...): pass
+
+        _fmt = "Call to deprecated {t} :: [{name}] ({reason})" 
+ 
+        def decorated(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                warnings.simplefilter('always', DeprecationWarning)
+                warnings.warn(
+                        _fmt.format(name=func.__name__,
+                                    t="class" if isclass(func) else "function",
+                                    reason=reason),
+                        category=DeprecationWarning,
+                        stacklevel=2)
+                warnings.simplefilter('default', DeprecationWarning)
+                return func(*args, **kwargs)
+            return wrapper
+        return decorated
+
+    elif isclass(reason) or isfunction(reason):
+        # @deprecated
+        # def old_function(..): pass
+        _func = reason
+        _fmt = "Call to deprecated {t} :: [{name}]"
+        
+        @wraps(_func)
+        def wrapper(*args, **kwargs):
+            warnings.simplefilter('always', DeprecationWarning)
+            warnings.warn(
+                    _fmt.format(name=_func.__name__,
+                                t="class" if isclass(reason) else "function"),
+                    category=DeprecationWarning,
+                    stacklevel=2)
+
+            warnings.simplefilter('default', DeprecationWarning)
+            return _func(*args, **kwargs)
+        return wrapper
+
+    else:
+        raise TypeError(f'Bad deprecation reason: {repr(type(reason))}')
+
+def watch_for(*signals):
+    """
+    Watch for an error; if it occurs, let it pass through, prepending
+    the function that caused it. Useful for apps that want to (eventually)
+    hide traceback errors but retain their messages. 
 
     args:
-        :assertion (callable) - the assertion to be validated
-        :onfail  (str) 
+        :*exs - expected exceptions
+    returns:
+        :decorator
+
+    usage:
+
+        >>> @watch_for(ZeroDivisionError, TypeError)
+        >>> def average(*points):
+        >>>     return sum(points)/len(points)
+
+        >>> average(1,2,3)
+            2.0
+        >>> average(1,2,'x')
+            TypeError: (- average -): unsupported operand type(s) for +: 'int' and 'str'
+
+        >>> average()
+            ZeroDivisionError: (- average -): division by zero
     """
-    assert callable(assertion), 'Invalid assertion; should be callable'
-    def wrap(func):
-        failure_msg = onfail if onfail else f"[{func.__name__}]: assertion failed" 
-        def wrapped(*args, **kwargs):
-            assert assertion(*args), failure_msg
-            return func(*args, **kwargs)
-        return wrapped
-    return wrap
+    if not all(issubclass(sig, BaseException) for sig in signals):
+        bad = [sig for sig in signals if not issubclass(sig, BaseException)]
+        raise TypeError(f"Bad signals: {bad}")
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)  # try to evaluate the function
+            except(signals) as sig:           # a watched signal occurred
+                is_sig = rpartial(op.is_, type(sig))
+                print('raised a ',type(sig))
+                raised = next(filter(is_sig, signals))
+                # prepend the responsible function and raise
+                raise raised(f"(- {func.__name__} -): {str(sig)}") 
+        return wrapper
+    return decorator
+
+
+
+#def check_that(assertion=lambda x: True, onfail=None):
+#    """
+#    a decorator to validate some arbitrary truthy statement
+#    prior to the actual computation
+#
+#    args:
+#        :assertion (callable) - the assertion to be validated
+#        :onfail  (str) 
+#    """
+#    assert callable(assertion), 'Invalid assertion; should be callable'
+#    def wrap(func):
+#        failure_msg = onfail if onfail else f"[{func.__name__}]: assertion failed" 
+#        def wrapped(*args, **kwargs):
+#            assert assertion(*args), failure_msg
+#            return func(*args, **kwargs)
+#        return wrapped
+#    return wrap
 
