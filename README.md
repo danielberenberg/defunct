@@ -32,9 +32,9 @@ def old_add(a, b):
 >>> old_add(100, 200)
 >>> DeprecationWarning: Call to deprecated function :: [old_add] (use the new version)
 
-Or who hasn't wanted to save a marginal amount of characters to perform a composition?
 ```
 
+Or who hasn't wanted to save a marginal amount of characters to perform a composition?
 ```python
 from defunct.funcs import compose
 
