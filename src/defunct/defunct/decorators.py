@@ -161,7 +161,7 @@ def deprecated(reason):
     else:
         raise TypeError(f'Bad deprecation reason: {repr(type(reason))}')
 
-def watch_for(*signals):
+def watchfor(*signals):
     """
     Watch for an error; if it occurs, let it pass through, prepending
     the function that caused it. Useful for apps that want to (eventually)
