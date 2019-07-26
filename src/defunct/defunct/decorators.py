@@ -197,7 +197,6 @@ def watch_for(*signals):
                 return func(*args, **kwargs)  # try to evaluate the function
             except(signals) as sig:           # a watched signal occurred
                 is_sig = rpartial(op.is_, type(sig))
-                print('raised a ',type(sig))
                 raised = next(filter(is_sig, signals))
                 # prepend the responsible function and raise
                 raise raised(f"(- {func.__name__} -): {str(sig)}") 
