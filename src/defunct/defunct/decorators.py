@@ -15,7 +15,7 @@ import logging, datetime
 from .utils import text_loader, text_dumper
 from .funcs import rpartial
 
-__all__ = ['autocache', 'check_that']
+__all__ = ['autocache', 'check_that', 'timeit']
 
 def autocache(loader=text_loader, 
              dumper=text_dumper,
@@ -235,21 +235,29 @@ def timeit(*uses):
         :a return value if return is true
     """
     valid = {'return', 'display', 'log'}
-    if len(uses) == 1 and callable(uses):
-        ret = True; display = log = False
+    print(uses)
+    if len(uses) == 1 and callable(uses[0]):
+        ret = True
+        func = uses[0]
+        def wrapper(*args, **kwargs):
+            before = datetime.datetime.now()
+            retval = func(*args, **kwargs)
+            after  = datetime.datetime.now()
+            elapsed = (after - before).seconds
+            return retval, elapsed if ret else retval
+
+        return wrapper
         
     
     elif set(uses) - valid:
         raise ValueError("`timeit` either accepts a callable or value in"
-                         "('return', 'display', 'log') (NOT '{set(uses) - valid}')") 
-    
-    else:
-        if 'return' in valid: ret = True
-        if 'display' in valid: display = True
-        if 'log' in valid: log = True
+                         f"('return', 'display', 'log') (NOT '{set(uses) - valid}')") 
 
-    printers = list(filter(None, [logging.getLogger(f"timeit:{func.__name__}").info if log else None,
-                                  print if display else None]))
+
+    printers = list(filter(None, [logging.getLogger(f"timeit:{func.__name__}").info if 'log' in uses else None,
+                                  print if 'display' in uses else None]))
+    
+    ret = 'return' in uses
     def speak(phrase):
         for printfunc in printers:
             printfunc(phrase)
