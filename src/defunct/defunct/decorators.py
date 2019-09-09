@@ -10,7 +10,8 @@ import warnings
 import operator as op
 from functools import wraps
 from inspect import isclass, isfunction
-                
+import logging, datetime
+
 from .utils import text_loader, text_dumper
 from .funcs import rpartial
 
@@ -222,4 +223,49 @@ def watchfor(*signals):
 #            return func(*args, **kwargs)
 #        return wrapped
 #    return wrap
+
+def timeit(*uses):
+    """
+    Time a function; choose to 'return', 'display', or 'log' it.
+
+    args:
+        :uses - (str(s) in ['return', 'display', 'log']
+    returns:
+        :the return type of the decorated function and ..
+        :a return value if return is true
+    """
+    valid = {'return', 'display', 'log'}
+    if len(uses) == 1 and callable(uses):
+        ret = True; display = log = False
+        
+    
+    elif set(uses) - valid:
+        raise ValueError("`timeit` either accepts a callable or value in"
+                         "('return', 'display', 'log') (NOT '{set(uses) - valid}')") 
+    
+    else:
+        if 'return' in valid: ret = True
+        if 'display' in valid: display = True
+        if 'log' in valid: log = True
+
+    printers = list(filter(None, [logging.getLogger(f"timeit:{func.__name__}").info if log else None,
+                                  print if display else None]))
+    def speak(phrase):
+        for printfunc in printers:
+            printfunc(phrase)
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            before = datetime.datetime.now()
+            speak(f"{func.__name__} started @ {before.strftime('%D - %H:%M:%S')}")
+            retval = func(*args, **kwargs)
+            after  = datetime.datetime.now()
+            elapsed = (after - before).seconds
+            speak(f"{func.__name__} ended @ {after.strftime('%D - %H:%M:%S')} ({elapsed}s)")
+
+            return retval, elapsed if ret else retval
+        return wrapper
+    return decorator
+
+
 
