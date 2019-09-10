@@ -1,17 +1,22 @@
 # defunct
 Exploring the functional paradigm in Python. Implementing dope decorators and funky functions.
+`defunct` includes three(-ish) submodules: `de`, `funct`, and `utils`. 
+
+Find decorators in `de` and functions in `funct`. Yes, most decorators are functions.
+Functions here mean "functions not specifically purposed as decorators".
+
 
 # usage
 A quick example of a decorator from the `defunct.decorators` module that caches 
 outputs of computationally intensive procedures
 
 ```python
-from defunct.decorators import autocache
+from defunct.de import autocache
 import random 
 import pickle
 
 
-@autocache(loader=pickle.load, dumper=pickle.dump, read_as='b', write_as='b')
+@autocache(loader=pickle.load, dumper=pickle.dump)
 def bajillion_randoms(num_rands=10000):
     """
     seeds for downstream stochastic computation
