@@ -6,16 +6,15 @@ decorators.py
 
 collection of decorous decorators to make your computational life easier
 """
-import warnings
+import logging, time, datetime, warnings
 import operator as op
 from functools import wraps
 from inspect import isclass, isfunction
-import logging, datetime
 
 from .utils import text_loader, text_dumper
 from .funcs import rpartial
 
-__all__ = ['autocache', 'check_that', 'timeit']
+__all__ = ['autocache', 'timeit', 'AverageRuntime', 'avgruntime', 'watchfor']
 
 def autocache(loader=text_loader, 
              dumper=text_dumper,
@@ -205,25 +204,6 @@ def watchfor(*signals):
     return decorator
 
 
-
-#def check_that(assertion=lambda x: True, onfail=None):
-#    """
-#    a decorator to validate some arbitrary truthy statement
-#    prior to the actual computation
-#
-#    args:
-#        :assertion (callable) - the assertion to be validated
-#        :onfail  (str) 
-#    """
-#    assert callable(assertion), 'Invalid assertion; should be callable'
-#    def wrap(func):
-#        failure_msg = onfail if onfail else f"[{func.__name__}]: assertion failed" 
-#        def wrapped(*args, **kwargs):
-#            assert assertion(*args), failure_msg
-#            return func(*args, **kwargs)
-#        return wrapped
-#    return wrap
-
 def timeit(*uses):
     """
     Time a function; choose to 'return', 'display', or 'log' it.
@@ -275,5 +255,50 @@ def timeit(*uses):
         return wrapper
     return decorator
 
+class AverageRuntime():
+    """
+    Decorator to keep and return a running average runtime for function calls
+    """
+    def __init__(self, func):
+        self.reset()
+        
+        def wrapper(*args, **kwargs):
+            begin = time.time()
+            ret = func(*args, **kwargs)
+            elapsed = time.time() - begin
+            self.__update(elapsed)
+            return ret, self._xt
+
+        self.wrapper = wrapper
+        self.__doc__ = func.__doc__ # make your own 'functools.wraps'
+
+            
+    def __update(self, obs):
+        """
+        Updates the average runtime
+        """
+        self._calls += 1
+        tmp = self._xt
+        self._xt = ((self._calls - 1)/self._calls)*self._xtm1 + (1/self._calls)*obs
+        self._xtm1 = tmp
+    
+    
+    def __call__(self, *args, **kwargs):
+        """Overrides () to make the decorated func function the same"""
+        return self.wrapper(*args, **kwargs)
+    
+    def reset(self):
+        """
+        0-out the running totals
+        """
+        self._calls = self._xtm1 = self._xt = 0
+        
+    def __invert__(self):
+        """
+        Add sugar to resetting
+        """
+        self.reset() 
+
+avgruntime = AverageRuntime
 
 
