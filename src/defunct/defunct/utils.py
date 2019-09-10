@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
-utils.py
-
-collection of non-decorator utilities that mesh well with decorum
+defunct utils
 """
 
 def text_dumper(output_text, dump_station):

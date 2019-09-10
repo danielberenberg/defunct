@@ -3,6 +3,8 @@
 
 import functools
 
+__all__ = ['compose', 'rpartial', 'lpartial', 'progress']
+
 def compose(*functions):
     """
     Compose a sequence of functions to a one routine.
@@ -80,6 +82,33 @@ def lpartial(func, *args):
         return func(*(args + a))
     return wrapper
 
-if __name__ == '__main__':
-    pass
+def progress(curr:int,
+             tot:int,
+             total_len:int = 80,
+             barchr:str='#',
+             currchr:str='@', 
+             emptychr:str='=', 
+             percent:bool=True) -> str:
+    """
+    Make a progress bar.
+    
+    args:
+        :curr (int) - current index
+        :tot  (int) - total length of run
+        :total_len (int) - length of progress bar
+        :barchr (str) - char for finished progress
+        :currchr (str) - char for current progress
+        :emptychr (str) - char for unfinished progress
+        :percent (bool) - include percent done at end of pbar
+    returns:
+        :(str) - constructed progress bar
+    """
+    if isinstance(currchr, (list, tuple)): # rotating progress bar
+        currchr = currchr[curr % len(currchr)]
+        
+    prog  = (curr + 1)/tot
+    nbars = int(total_len * prog) - 1
+    rest  = total_len - nbars - 1
+    bar = f"[{nbars * barchr}{currchr if rest else ''}{emptychr * rest}]"
+    return bar + f"({prog * 100:0.2f}%)" if percent else bar
 

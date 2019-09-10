@@ -12,7 +12,7 @@ from functools import wraps
 from inspect import isclass, isfunction
 
 from .utils import text_loader, text_dumper
-from .funcs import rpartial
+from .funct import rpartial
 
 __all__ = ['autocache', 'timeit', 'AverageRuntime', 'avgruntime', 'watchfor']
 
