@@ -215,16 +215,13 @@ def timeit(*uses):
         :a return value if return is true
     """
     valid = {'return', 'display', 'log'}
-    print(uses)
     if len(uses) == 1 and callable(uses[0]):
-        ret = True
         func = uses[0]
         def wrapper(*args, **kwargs):
-            before = datetime.datetime.now()
+            before = time.time() #datetime.datetime.now()
             retval = func(*args, **kwargs)
-            after  = datetime.datetime.now()
-            elapsed = (after - before).seconds
-            return retval, elapsed if ret else retval
+            elapsed = time.time() - before 
+            return retval, elapsed
 
         return wrapper
         
