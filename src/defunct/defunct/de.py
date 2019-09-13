@@ -231,15 +231,16 @@ def timeit(*uses):
                          f"('return', 'display', 'log') (NOT '{set(uses) - valid}')") 
 
 
-    printers = list(filter(None, [logging.getLogger(f"timeit:{func.__name__}").info if 'log' in uses else None,
-                                  print if 'display' in uses else None]))
-    
-    ret = 'return' in uses
-    def speak(phrase):
-        for printfunc in printers:
-            printfunc(phrase)
 
     def decorator(func):
+        printers = list(filter(None, [logging.getLogger(f"timeit:{func.__name__}").info if 'log' in uses else None,
+                                      print if 'display' in uses else None]))
+        
+        ret = 'return' in uses
+        def speak(phrase):
+            for printfunc in printers:
+                printfunc(phrase)
+
         def wrapper(*args, **kwargs):
             before = datetime.datetime.now()
             speak(f"{func.__name__} started @ {before.strftime('%D - %H:%M:%S')}")
